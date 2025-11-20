@@ -6,7 +6,7 @@ export class DecibelMeter {
   private context: AudioContext | null = null;
   private analyzer: AnalyserNode | null = null;
   private microphone: MediaStreamAudioSourceNode | null = null;
-  private dataArray: Uint8Array | null = null;
+  private dataArray: Uint8Array<ArrayBuffer> | null = null;
   private animationId: number | null = null;
   
   /**
@@ -19,7 +19,7 @@ export class DecibelMeter {
       this.analyzer.fftSize = 256;
       
       const bufferLength = this.analyzer.frequencyBinCount;
-      this.dataArray = new Uint8Array(bufferLength);
+      this.dataArray = new Uint8Array(bufferLength) as Uint8Array<ArrayBuffer>;
       
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       this.microphone = this.context.createMediaStreamSource(stream);
@@ -36,7 +36,7 @@ export class DecibelMeter {
   getDecibel(): number {
     if (!this.analyzer || !this.dataArray) return 0;
     
-    this.analyzer.getByteTimeDomainData(this.dataArray);
+    this.analyzer.getByteTimeDomainData(this.dataArray as Uint8Array<ArrayBuffer>);
     
     // 计算 RMS
     let sum = 0;
@@ -59,7 +59,7 @@ export class DecibelMeter {
   getFrequencyData(): Uint8Array {
     if (!this.analyzer || !this.dataArray) return new Uint8Array(0);
     
-    this.analyzer.getByteFrequencyData(this.dataArray);
+    this.analyzer.getByteFrequencyData(this.dataArray as Uint8Array<ArrayBuffer>);
     return this.dataArray;
   }
   
